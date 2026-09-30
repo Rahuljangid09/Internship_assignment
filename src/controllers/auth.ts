@@ -3,6 +3,7 @@ import prisma from "../config/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {sendEmail} from "../utils/sendEmail";
+import { AppError } from "../utils/appError";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -98,7 +99,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 export const resetPassword = async (req: Request, res: Response) => {
     const{email,otp,newPassword} = req.body;
     if(!email || !otp || !newPassword){
-        return res.status(400).json({message:"email,otp and newPassword are required"});
+        throw new AppError("email,otp and newPassword are required",400);
     }
     const otpRecord = await prisma.passwordResetOtp.findFirst({
         where:{email,used:false,expiresAt:{gt:new Date()}},orderBy:{createdAt:'desc'}
