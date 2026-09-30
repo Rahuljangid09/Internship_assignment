@@ -16,7 +16,7 @@ export const register = async (req: Request, res: Response) => {
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(409).json({ message: "email already exisst!" });
+      throw new AppError("email already exists!", 409);
     }
 
     const hasdedPass = await bcrypt.hash(password, 10);
@@ -43,17 +43,17 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: "email and pass are required" });
+      throw new AppError("email and pass are required", 400);
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      throw new AppError("User not found", 404);
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      throw new AppError("Invalid credentials", 401);
     }
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
@@ -74,12 +74,12 @@ export const login = async (req: Request, res: Response) => {
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) {
-    return res.status(400).json({ message: "Email is required" });
+    throw new AppError("Email is required", 400);
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    throw new AppError("User not found", 404);
   }
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const hashedOtp = await bcrypt.hash(otp, 10);
@@ -105,11 +105,11 @@ export const resetPassword = async (req: Request, res: Response) => {
         where:{email,used:false,expiresAt:{gt:new Date()}},orderBy:{createdAt:'desc'}
     });
     if(!otpRecord){
-        return res.status(400).json({message:"Invalid or expired OTP"});
+        throw new AppError("Invalid or expired OTP",400);
     }
     const match = await bcrypt.compare(otp,otpRecord.otpHash);
     if(!match){
-        return res.status(400).json({message:"Invalid OTP"});
+        throw new AppError("Invalid OTP",400);
     }
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
