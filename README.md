@@ -34,7 +34,7 @@ You need Node 18 or above, a PostgreSQL database and a free Resend account (for 
    DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
    JWT_SECRET="any_long_random_string"
    RESEND_API_KEY="re_xxxxxxxxx"
-   PORT=5000
+   PORT=3000
    ```
 
    PORT is optional, it defaults to 5000.
@@ -51,7 +51,7 @@ You need Node 18 or above, a PostgreSQL database and a free Resend account (for 
    npm run dev
    ```
 
-The server will run on http://localhost:5000
+The server will run on http://localhost:3000
 
 ## API endpoints
 
